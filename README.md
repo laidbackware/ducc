@@ -4,11 +4,12 @@ ducc - Docker-compose + UAA + Concourse + Credhub
 # Env vars
 These must be consistent and are required to restart ducc.
 
-export HOSTNAME=192.168.0.3 # Can be IP or hostname
-export CONCOURSE_ADMIN_PASSWORD=test
-export CREDHUB_CLIENT_SECRET=secret
-export POSTGRES_PASSWORD=password
-export ENCRYPTION_PASSWORD=changeme
+export HOSTNAME=192.168.0.3 # Can be IP or hostname 
+export ENCRYPTION_PASSWORD=password1234 
+export CONCOURSE_ADMIN_PASSWORD=test 
+export CREDHUB_CLIENT_SECRET=secret 
+export POSTGRES_PASSWORD=password 
+export TRUST_STORE_PASSWORD=changeit # Cannot be changed currently
 
 # Process
 1. Run '1-prepare-credhub-image.sh' to build the credhub image and store in local docker cache
@@ -19,5 +20,5 @@ export ENCRYPTION_PASSWORD=changeme
 4. (Optional) To test all is well run tests/1-insert-cred-test-pipeline.sh
 
 # TODO
-- The UAA image needs to be switched to the one provided by cfidentity
+- Alter Docker build to set Java Keystore passwords 
 - An official credhub image should be used when available which will hopefully fix the issue with the static passwords on the java keystores.
