@@ -5,5 +5,5 @@ encryption:
       provider_type: internal
       keys:
         - active: true
-          encryption_password: changeme
+          encryption_password: ${ENCRYPTION_PASSWORD}
 

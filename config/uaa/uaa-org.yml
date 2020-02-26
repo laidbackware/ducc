@@ -1,6 +1,3 @@
-scim:
-  users:
-    - credhub|password|credhub|Credhub|User|credhub.read,credhub.write
 oauth:
   clients:
     credhub_cli:
@@ -15,18 +12,11 @@ oauth:
     credhub_client:
       override: true
       authorized-grant-types: client_credentials
-      secret: secret
+      # secret: secret
+      secret: ((credhub_client_secret))
       scope: uaa.none
       authorities: credhub.read,credhub.write
       access-token-validity: 86400 # 1 day
-    concourse:
-      id: myclientid
-      secret: secret
-      scope: openid,cloud_controller.read
-      authorized-grant-types: "authorization_code,refresh_token"
-      access-token-validity: 3600
-      refresh-token-validity: 3600
-      redirect-uri: https://concourse.example.com/sky/issuer/callback
 jwt:
   token:
     verification-key: |

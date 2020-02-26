@@ -16,3 +16,6 @@ security:
     resource:
       id: credhub
     enabled: true
+    
+certificates:
+  concatenate_cas: true
