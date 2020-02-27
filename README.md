@@ -1,7 +1,5 @@
-# ducc
-ducc - Docker-compose + UAA + Concourse + Credhub (plus Minio)
-
 # Description
+Pronounced Duck.
 The goal of this project is the provide the simplest possible implementation of Concourse with Credhub secret management.
 
 # Dependencies
