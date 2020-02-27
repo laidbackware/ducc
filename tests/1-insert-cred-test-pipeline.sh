@@ -12,8 +12,8 @@ until $(curl -k --output /dev/null --silent --head --fail https://${HOSTNAME}:90
       echo "Max attempts reached"
       exit 1
     fi
-    ATTEMPT_COUNTER=$(let ${ATTEMPT_COUNTER}+1)
-    CURRENT_TRY=$(let ${MAX_ATTEMPTS}-${ATTEMPT_COUNTER})
+    ATTEMPT_COUNTER=$(expr ${ATTEMPT_COUNTER} + 1)
+    CURRENT_TRY=$(expr ${MAX_ATTEMPTS} - ${ATTEMPT_COUNTER})
     echo "https://${HOSTNAME}:9000/info not online yet, ${CURRENT_TRY} more retries left"
     sleep 5
 done

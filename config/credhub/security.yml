@@ -17,5 +17,5 @@ security:
       id: credhub
     enabled: true
     
-certificates:
-  concatenate_cas: true
+# certificates:
+#   concatenate_cas: true
