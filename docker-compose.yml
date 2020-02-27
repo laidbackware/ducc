@@ -10,7 +10,7 @@ services:
         entrypoint: /bin/bash -c
         command:
             - "cp /import/uaa.yml /home/vcap/uaa.yml && 
-                    sed -i 's/((credhub_client_secret))/${CREDHUB_CLIENT_SECRET}/g' /home/vcap/uaa.yml &&
+                    sed -i 's/((credhub_client_secret))/${DUCC_CREDHUB_CLIENT_SECRET}/g' /home/vcap/uaa.yml &&
                     /cnb/lifecycle/launcher" 
         environment:
             UAA_CONFIG_FILE: /home/vcap/uaa.yml
@@ -21,10 +21,10 @@ services:
         environment:
             POSTGRES_DB: credhub
             POSTGRES_USER: admin
-            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+            POSTGRES_PASSWORD: ${DUCC_POSTGRES_PASSWORD}
 
     credhub:
-        image: credhub/credhub:local
+        image: credhub/credhub:local-2.5
         volumes:
         - ./config/credhub/:/etc/config/
         depends_on: [db, uaa]
@@ -34,13 +34,13 @@ services:
         ports:
         - "9000:9000"
         environment:
-            CREDHUB_AUTH_SERVER_EXTERNAL_URL: http://${HOSTNAME}:8008 #/uaa
-            TRUST_STORE_PASSWORD: ${TRUST_STORE_PASSWORD} # CANNOT BE CHANGED CURRENTLY!!! 
-            ENCRYPTION_PASSWORD: ${ENCRYPTION_PASSWORD}
+            CREDHUB_AUTH_SERVER_EXTERNAL_URL: http://${DUCC_HOSTNAME}:8008 #/uaa
+            TRUST_STORE_PASSWORD: ${DUCC_TRUST_STORE_PASSWORD} # CANNOT BE CHANGED CURRENTLY!!! 
+            ENCRYPTION_PASSWORD: ${DUCC_ENCRYPTION_PASSWORD}
             LOG_LEVEL: debug
             DATABASE: postgres
             DATABASE_USERNAME: admin
-            DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+            DATABASE_PASSWORD: ${DUCC_POSTGRES_PASSWORD}
             DATABASE_URL: jdbc:postgresql://db:5432/credhub?autoReconnect=true
 
     concourse-db:
@@ -52,7 +52,7 @@ services:
             PGDATA: /database
 
     concourse:
-        image: concourse/concourse
+        image: concourse/concourse:5.8.0
         command: quickstart
         privileged: true
         depends_on: [concourse-db, credhub]
@@ -62,25 +62,25 @@ services:
             CONCOURSE_POSTGRES_USER: concourse_user
             CONCOURSE_POSTGRES_PASSWORD: concourse_pass
             CONCOURSE_POSTGRES_DATABASE: concourse
-            CONCOURSE_EXTERNAL_URL: http://${HOSTNAME}:8080
-            CONCOURSE_ADD_LOCAL_USER: admin:${CONCOURSE_ADMIN_PASSWORD}
+            CONCOURSE_EXTERNAL_URL: http://${DUCC_HOSTNAME}:8080
+            CONCOURSE_ADD_LOCAL_USER: admin:${DUCC_CONCOURSE_ADMIN_PASSWORD}
             CONCOURSE_MAIN_TEAM_LOCAL_USER: admin
             CONCOURSE_WORKER_BAGGAGECLAIM_DRIVER: overlay
-            CONCOURSE_CREDHUB_URL: https://${HOSTNAME}:9000
+            CONCOURSE_CREDHUB_URL: https://${DUCC_HOSTNAME}:9000
             CONCOURSE_CREDHUB_INSECURE_SKIP_VERIFY: "true"
             # useCaCert: "false"
             CONCOURSE_CREDHUB_CLIENT_ID: credhub_client
-            CONCOURSE_CREDHUB_CLIENT_SECRET: ${CREDHUB_CLIENT_SECRET}
+            CONCOURSE_CREDHUB_CLIENT_SECRET: ${DUCC_CREDHUB_CLIENT_SECRET}
 
     minio:
         image: minio/minio
         volumes:
-            - "${MINIO_PATH}:/data" # This depends on a 
+            - "${DUCC_MINIO_PATH}:/data" # This depends on a 
         ports:
             - "9080:9000"
         environment:
             MINIO_ACCESS_KEY: minio
-            MINIO_SECRET_KEY: ${MINIO_SECRET}
+            MINIO_SECRET_KEY: ${DUCC_MINIO_SECRET}
         command: server /data
         healthcheck:
             test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
