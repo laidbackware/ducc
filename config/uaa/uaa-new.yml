@@ -8,17 +8,6 @@ encryption:
 admin:
   client_secret: secret
 
-# scim: 
-#   users:
-#   - groups:
-#     - scim.write
-#     - scim.read
-#     - bosh.admin
-#     name: admin
-#     password: password
-
-# url: http://uaa:8080
-
 zones:
   internal:
     hostnames: []
