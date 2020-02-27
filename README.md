@@ -31,7 +31,7 @@ Useful login commands:
 Concourse can be extended with features using the documentation and environmental variables. For example LDAP authentication can be configured.
 
 The Minio webpage is accessible on http://${HOSTNAME}:9080 with username minio and the password from the .envrc.
-
+ 
 # Running Offline
 It's possible to run offline, but an internet connected system running Docker is required to prepare the images.
 - The prepare credhub script must be run on the internet connected machine.
