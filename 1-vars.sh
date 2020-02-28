@@ -1,4 +1,4 @@
-export DUCC_HOSTNAME=localhost # Can be IP or hostname. Needs to be changed if access externally.
+export DUCC_HOSTNAME=192.168.0.3 # Can be IP or hostname. Needs to be changed if access externally.
 export DUCC_CONCOURSE_ADMIN_PASSWORD=test
 export DUCC_ENCRYPTION_PASSWORD=changeme
 export DUCC_POSTGRES_PASSWORD=changeme

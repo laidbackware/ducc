@@ -67,7 +67,7 @@ services:
             CONCOURSE_ADD_LOCAL_USER: admin:${DUCC_CONCOURSE_ADMIN_PASSWORD}
             CONCOURSE_MAIN_TEAM_LOCAL_USER: admin
             CONCOURSE_WORKER_BAGGAGECLAIM_DRIVER: overlay
-            CONCOURSE_CREDHUB_URL: https://${DUCC_HOSTNAME}:9000
+            CONCOURSE_CREDHUB_URL: https://credhub:9000
             CONCOURSE_CREDHUB_INSECURE_SKIP_VERIFY: "true"
             # useCaCert: "false"
             CONCOURSE_CREDHUB_CLIENT_ID: credhub_client

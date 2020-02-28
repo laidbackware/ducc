@@ -2,7 +2,6 @@
 # Build credhub docker image to store in local Docker cache
 
 set -euxo pipefail
-SCRIPT_DIR=$(pwd)
 
 pushd /tmp
 git clone https://github.com/cloudfoundry-incubator/credhub.git
