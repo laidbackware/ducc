@@ -10,7 +10,7 @@ Needed to start Concourse:
 - An internet connection
 - (optional) direnv
 
-The following CLI tools are needed to operate Concourse/Credhub/Minio and can be installed by the script detail in the setup process:
+The following CLI tools are needed to operate Concourse/Credhub/Minio and can be installed by the script detailed in the setup process:
 - Fly CLI - https://github.com/concourse/concourse/releases
 - Credhub CLI - https://github.com/cloudfoundry-incubator/credhub-cli/releases
 - Minio Client - https://min.io/download#/linux
@@ -19,6 +19,9 @@ The following CLI tools are needed to operate Concourse/Credhub/Minio and can be
 1. (Optional) Customize the vars in '1-vars.sh':
    - DUCC_HOSTNAME must be set to a IP or DNS entry be able to properly access the Concourse web page from another machine.
    - DUCC_MINIO_PATH should point to a persistent location to survive being torn down.
+   - DUCC_CONCOURSE_ADMIN_PASSWORD, DUCC_CREDHUB_CLIENT_SECRET and DUCC_MINIO_SECRET can be changed at any time
+   - DUCC_ENCRYPTION_PASSWORD and DUCC_POSTGRES_PASSWORD are setup on first use and cannot be changed.
+   - DUCC_TRUST_STORE_PASSWORD currently cannot be changed
 2. Export the environmental variables by either:
    1. Using direnv. On first use run 'direnv allow'
    2. Running 'source 1-vars.sh' to manually set the variables.
