@@ -16,7 +16,7 @@ services:
             UAA_CONFIG_FILE: /home/vcap/uaa.yml
             BPL_TOMCAT_ACCESS_LOGGING: enabled
 
-    db:
+    credhub-db:
         image: postgres:9.6
         environment:
             POSTGRES_DB: credhub
@@ -27,28 +27,29 @@ services:
         image: credhub/credhub:local-2.5
         volumes:
         - ./config/credhub/:/etc/config/
-        depends_on: [db, uaa]
+        depends_on: [credhub-db, uaa]
         links:
-            - db
+            - credhub-db
             - uaa
         ports:
         - "9000:9000"
         environment:
             CREDHUB_AUTH_SERVER_EXTERNAL_URL: http://${DUCC_HOSTNAME}:8008 #/uaa
+            CREDHUB_AUTH_SERVER_INTERNAL_URL: http://uaa:8080
             TRUST_STORE_PASSWORD: ${DUCC_TRUST_STORE_PASSWORD} # CANNOT BE CHANGED CURRENTLY!!! 
             ENCRYPTION_PASSWORD: ${DUCC_ENCRYPTION_PASSWORD}
             LOG_LEVEL: debug
             DATABASE: postgres
             DATABASE_USERNAME: admin
             DATABASE_PASSWORD: ${DUCC_POSTGRES_PASSWORD}
-            DATABASE_URL: jdbc:postgresql://db:5432/credhub?autoReconnect=true
+            DATABASE_URL: jdbc:postgresql://credhub-db:5432/credhub?autoReconnect=true
 
     concourse-db:
         image: postgres:9.6
         environment:
             POSTGRES_DB: concourse
-            POSTGRES_PASSWORD: concourse_pass
-            POSTGRES_USER: concourse_user
+            POSTGRES_PASSWORD: ${DUCC_POSTGRES_PASSWORD}
+            POSTGRES_USER: admin
             PGDATA: /database
 
     concourse:
@@ -59,8 +60,8 @@ services:
         ports: ["8080:8080"]
         environment:
             CONCOURSE_POSTGRES_HOST: concourse-db
-            CONCOURSE_POSTGRES_USER: concourse_user
-            CONCOURSE_POSTGRES_PASSWORD: concourse_pass
+            CONCOURSE_POSTGRES_USER: admin
+            CONCOURSE_POSTGRES_PASSWORD: ${DUCC_POSTGRES_PASSWORD}
             CONCOURSE_POSTGRES_DATABASE: concourse
             CONCOURSE_EXTERNAL_URL: http://${DUCC_HOSTNAME}:8080
             CONCOURSE_ADD_LOCAL_USER: admin:${DUCC_CONCOURSE_ADMIN_PASSWORD}

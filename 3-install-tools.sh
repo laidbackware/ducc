@@ -11,7 +11,7 @@ TMPDIR=$(mktemp -d) || exit 1
 echo "Temp dir is ${TMPDIR}"
 
 
-CREDHUB_CLI_VERSION=2.7.0
+CREDHUB_CLI_VERSION=2.6.2
 FLY_CLI_VERSION=$(cat docker-compose.yml |grep "image: concourse/concourse" | cut -d ":" -f3)
 
 OS=$(echo "$(uname -s)" | awk '{print tolower($0)}')
