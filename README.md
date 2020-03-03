@@ -16,7 +16,7 @@ The following CLI tools are needed to operate Concourse/Credhub/Minio and can be
 - Minio Client - https://min.io/download#/linux
 
 # Setup Process
-1. (Optional) Customize the vars in '1-vars.sh':
+1. (Optional) Customize the vars in `1-vars.sh`:
    - DUCC_HOSTNAME must be set to a IP or DNS entry be able to properly access the Concourse web page from another machine.
    - DUCC_MINIO_PATH should point to a persistent location to survive being torn down.
    - DUCC_CONCOURSE_ADMIN_PASSWORD, DUCC_CREDHUB_CLIENT_SECRET and DUCC_MINIO_SECRET can be changed at any time
