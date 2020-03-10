@@ -16,12 +16,12 @@ The following CLI tools are needed to operate Concourse/Credhub/Minio and can be
 - Minio Client - https://min.io/download#/linux
 
 # Setup Process
-1. (Optional) Customize the vars in '1-vars.sh':
-   - DUCC_HOSTNAME must be set to a IP or DNS entry be able to properly access the Concourse web page from another machine.
-   - DUCC_MINIO_PATH should point to a persistent location to survive being torn down.
-   - DUCC_CONCOURSE_ADMIN_PASSWORD, DUCC_CREDHUB_CLIENT_SECRET and DUCC_MINIO_SECRET can be changed at any time
-   - DUCC_ENCRYPTION_PASSWORD and DUCC_POSTGRES_PASSWORD are setup on first use and cannot be changed.
-   - DUCC_TRUST_STORE_PASSWORD currently cannot be changed
+1. Customize the vars in '1-vars.sh':
+   - DUCC_HOSTNAME must be set to a IP or DNS entry for credhub integration to work.
+   - (option) DUCC_MINIO_PATH should point to a persistent location to survive being torn down.
+   - (option) DUCC_CONCOURSE_ADMIN_PASSWORD, DUCC_CREDHUB_CLIENT_SECRET and DUCC_MINIO_SECRET can be changed at any time
+   - (option) DUCC_ENCRYPTION_PASSWORD and DUCC_POSTGRES_PASSWORD are setup on first use and cannot be changed.
+   - (exception!) DUCC_TRUST_STORE_PASSWORD currently cannot be changed
 2. Export the environmental variables by either:
    1. If using direnv run 'direnv allow' within the directory.
    2. Running 'source 1-vars.sh' to manually set the variables.
@@ -41,11 +41,14 @@ When accessing the Concourse webpage, the hostname in the '1-vars.sh' file  must
 Useful login commands:
 - fly login -t main -c http://${DUCC_HOSTNAME}:8080 -u admin -p ${DUCC_CONCOURSE_ADMIN_PASSWORD} -k
 - credhub login -s https://${DUCC_HOSTNAME}:9000 --client-name credhub_client --client-secret ${DUCC_CREDHUB_CLIENT_SECRET} --skip-tls-validation
-- mc config host add docker http://${DUCC_HOSTNAME}:9080 minio ${DUCC_MINIO_SECRET} --api "s3v4"
+- mc config host add ducc http://${DUCC_HOSTNAME}:9080 minio ${DUCC_MINIO_SECRET} --api "s3v4"
 
 Concourse can be extended with features using the documentation and environmental variables in the docker-compose.yml file. For example the linked process can be followed to add LDAP authentication https://concourse-ci.org/ldap-auth.html
 
 The Minio webpage is accessible on http://${DUCC_HOSTNAME}:9080 with username minio and the password from the '1-vars.sh' file.
+
+# Managing Docker volume space
+If using Concourse heavily with large resources, then the Docker volumes will consume quite a bit of space, so watch out for it filling the mount/disk. Depending on the pipelines run, it's good to have at least 100GB available. Volume size can be monitored with `docker system df` and if there are any unused volumes they are shown as reclaimable, so to reclaim run `docker system prune --volumes`. Concourse and Docker will grow and shrink the in use volumes automatically based on usage.
 
 # Running Offline
 It's possible to run offline, but an internet connected system running Docker is required to prepare the images.
@@ -65,3 +68,4 @@ During the credhub build
 
 # TODO
 - An official credhub image should be used when available which will hopefully fix the issue with the static passwords on the java keystores.
+- Investigate adding TLS encryption to UAA and Concourse endpoints
