@@ -16,33 +16,19 @@ services:
             UAA_CONFIG_FILE: /home/vcap/uaa.yml
             BPL_TOMCAT_ACCESS_LOGGING: enabled
 
-    credhub-db:
-        image: postgres:9.6
-        environment:
-            POSTGRES_DB: credhub
-            POSTGRES_USER: admin
-            POSTGRES_PASSWORD: ${DUCC_POSTGRES_PASSWORD}
-
     credhub:
-        image: credhub/credhub:local-2.5
-        volumes:
-        - ./config/credhub/:/etc/config/
-        depends_on: [credhub-db, uaa]
+        image: pcfseceng/credhub:2.6.0
+        depends_on: [uaa]
         links:
-            - credhub-db
             - uaa
         ports:
         - "9000:9000"
         environment:
-            CREDHUB_AUTH_SERVER_EXTERNAL_URL: http://${DUCC_HOSTNAME}:8008 #/uaa
-            CREDHUB_AUTH_SERVER_INTERNAL_URL: http://uaa:8080
-            TRUST_STORE_PASSWORD: ${DUCC_TRUST_STORE_PASSWORD} # CANNOT BE CHANGED CURRENTLY!!! 
+            UAA_URL: http://${DUCC_HOSTNAME}:8008
+            TRUST_STORE_PASSWORD: ${DUCC_ENCRYPTION_PASSWORD}
             ENCRYPTION_PASSWORD: ${DUCC_ENCRYPTION_PASSWORD}
-            LOG_LEVEL: debug
-            DATABASE: postgres
-            DATABASE_USERNAME: admin
-            DATABASE_PASSWORD: ${DUCC_POSTGRES_PASSWORD}
-            DATABASE_URL: jdbc:postgresql://credhub-db:5432/credhub?autoReconnect=true
+            KEY_STORE_PASSWORD: ${DUCC_ENCRYPTION_PASSWORD}
+            SUBJECT_ALTERNATIVE_NAMES: DNS:localhost, IP:127.0.0.1, DNS:credhub
 
     concourse-db:
         image: postgres:9.6
@@ -53,7 +39,7 @@ services:
             PGDATA: /database
 
     concourse:
-        image: concourse/concourse:5.8.0
+        image: concourse/concourse:6.0.0
         command: quickstart
         privileged: true
         depends_on: [concourse-db, credhub]

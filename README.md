@@ -7,7 +7,7 @@ Needed to start Concourse:
 - docker-ce, plus the ability to run privileged containers
 - docker-compose
 - Your user in the docker group
-- An internet connection
+- An internet connection or the required images in the local Docker cache
 - (optional) direnv
 
 The following CLI tools are needed to operate Concourse/Credhub/Minio and can be installed by the script detailed in the setup process:
@@ -21,16 +21,13 @@ The following CLI tools are needed to operate Concourse/Credhub/Minio and can be
    - (option) `DUCC_MINIO_PATH` should point to a persistent location to survive being torn down.
    - (option) `DUCC_CONCOURSE_ADMIN_PASSWORD`, `DUCC_CREDHUB_CLIENT_SECRET` and `DUCC_MINIO_SECRET` can be changed at any time
    - (option) `DUCC_ENCRYPTION_PASSWORD` and `DUCC_POSTGRES_PASSWORD` are setup on first use and cannot be changed.
-   - (exception!) `DUCC_TRUST_STORE_PASSWORD`currently cannot be changed
 2. Export the environmental variables by either:
    1. If using direnv run `direnv allow` within the directory.
    2. Running `source 1-vars.sh` to manually set the variables.
-3. Run `2-prepare-credhub-image.sh` to build the credhub image and store it in the local docker cache.
-4. Run one of the following:
-   1. On first run use `docker-compose up --abort-on-container-exit`  to ensure everything starts and check logs.
-   2. To run in the background run `docker-compose up -d`. 
-      Logs are available by running `docker-compose logs` in the same directory as the docker-compose.yml file.
-5. (Optional) Run `3-install-tools.sh` to install the necessary cli tools.
+
+4. To run in the background run `docker-compose up -d`. 
+      Logs are available by running `docker-compose logs` in the same directory as the docker-compose.yml file. `docker-compose ps` can be use to check the state of the containers.
+5. (Optional) Run `2-install-tools.sh` to install the necessary cli tools.
 6. (Optional) To test all is well run `tests/1-insert-cred-test-pipeline.sh`.
 
 From now on standard docker-compose commands can be used to stop and start the deployment.
@@ -65,9 +62,8 @@ At runtime
 - cfidentity/uaa
 - minio/minio
 - postgres
-During the credhub build
-- openjdk
+- pcfseceng/credhub
 
 # TODO
-- An official credhub image should be used when available which will hopefully fix the issue with the static passwords on the java keystores.
+- Refactor to use latest Alpine based UAA image
 - Add second compose file and scripts to enable generation of tls certs for all components
