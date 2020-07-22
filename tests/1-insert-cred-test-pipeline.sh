@@ -4,7 +4,7 @@
 set -euo pipefail
 
 ATTEMPT_COUNTER=0
-MAX_ATTEMPTS=12
+MAX_ATTEMPTS=11
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 until $(curl -k --output /dev/null --silent --head --fail https://${DUCC_HOSTNAME}:9000/info); do
