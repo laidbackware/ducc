@@ -1,1 +1,5 @@
 1-vars.sh
+
+# Vagrant
+.vagrant
+*.log
