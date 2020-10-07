@@ -7,6 +7,7 @@ services:
             - 8008:8080
         volumes:
             - ./config/uaa/uaa-new.yml:/import/uaa.yml
+            - ./config/uaa/log4j2.properties:/workspace/WEB-INF/classes/log4j2.properties
         entrypoint: /bin/bash -c
         command:
             - "cp /import/uaa.yml /home/vcap/uaa.yml && 
@@ -17,7 +18,7 @@ services:
             BPL_TOMCAT_ACCESS_LOGGING: enabled
 
     credhub:
-        image: pcfseceng/credhub:2.6.0
+        image: pcfseceng/credhub:2.9.1
         depends_on: [uaa]
         links:
             - uaa
