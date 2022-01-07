@@ -1,3 +1,5 @@
+# DEPRECATED - This repo is no longer maintained as there is not a usable UAA instance which has Log4j patched!
+
 # Description
 Pronounced Duck.
 The goal of this project is the provide the simplest possible implementation of Concourse with Credhub secret management.
