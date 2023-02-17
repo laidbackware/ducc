@@ -1,77 +1,123 @@
 version: '3'
 
 services:
-    uaa: # new
-        image: cfidentity/uaa:74.13.0
-        ports:
-            - 8008:8080
-        volumes:
-            - ./config/uaa/uaa-new.yml:/import/uaa.yml
-            - ./config/uaa/log4j2.properties:/workspace/WEB-INF/classes/log4j2.properties
-        entrypoint: /bin/bash -c
-        command:
-            - "cp /import/uaa.yml /home/vcap/uaa.yml && 
-                    sed -i 's/((credhub_client_secret))/${DUCC_CREDHUB_CLIENT_SECRET}/g' /home/vcap/uaa.yml &&
-                    /cnb/lifecycle/launcher" 
-        environment:
-            UAA_CONFIG_FILE: /home/vcap/uaa.yml
-            BPL_TOMCAT_ACCESS_LOGGING: enabled
+  uaa: # new
+    image: cloudfoundry/uaa:76.2.0
+    ports:
+      - 8008:8080
+    volumes:
+      - ./config/uaa/uaa-new.yml:/import/uaa.yml
+      - ./config/uaa/log4j2.properties:/workspace/WEB-INF/classes/log4j2.properties
+    entrypoint: /bin/bash -c
+    command:
+      - "cp /import/uaa.yml /workspace/uaa.yml && 
+        sed -i 's/((credhub_client_secret))/${DUCC_CREDHUB_CLIENT_SECRET}/g' /workspace/uaa.yml &&
+        /cnb/process/web" 
+    environment:
+      UAA_CONFIG_FILE: /workspace/uaa.yml
+      BPL_TOMCAT_ACCESS_LOGGING: enabled
 
-    credhub:
-        image: pcfseceng/credhub:2.9.1
-        depends_on: [uaa]
-        links:
-            - uaa
-        ports:
-        - "9000:9000"
-        environment:
-            UAA_URL: http://${DUCC_HOSTNAME}:8008
-            TRUST_STORE_PASSWORD: ${DUCC_ENCRYPTION_PASSWORD}
-            ENCRYPTION_PASSWORD: ${DUCC_ENCRYPTION_PASSWORD}
-            KEY_STORE_PASSWORD: ${DUCC_ENCRYPTION_PASSWORD}
-            SUBJECT_ALTERNATIVE_NAMES: DNS:localhost, IP:127.0.0.1, DNS:credhub
+  credhub:
+    image: pcfseceng/credhub:2.12.20
+    depends_on: [uaa]
+    links:
+      - uaa
+    ports:
+      - "9000:9000"
+    environment:
+      UAA_URL: http://${DUCC_HOSTNAME}:8008
+      TRUST_STORE_PASSWORD: ${DUCC_ENCRYPTION_PASSWORD}
+      ENCRYPTION_PASSWORD: ${DUCC_ENCRYPTION_PASSWORD}
+      KEY_STORE_PASSWORD: ${DUCC_ENCRYPTION_PASSWORD}
+      SUBJECT_ALTERNATIVE_NAMES: DNS:localhost, IP:127.0.0.1, DNS:credhub
 
-    concourse-db:
-        image: postgres:9.6
-        environment:
-            POSTGRES_DB: concourse
-            POSTGRES_PASSWORD: ${DUCC_POSTGRES_PASSWORD}
-            POSTGRES_USER: admin
-            PGDATA: /database
+  concourse-db:
+    image: postgres:15.2-alpine3.17
+    shm_size: 1gb
+    environment:
+      POSTGRES_DB: concourse
+      POSTGRES_PASSWORD: ${DUCC_POSTGRES_PASSWORD}
+      POSTGRES_USER: admin
+      PGDATA: /database
 
-    concourse:
-        image: concourse/concourse:6.7.0
-        command: quickstart
-        privileged: true
-        depends_on: [concourse-db, credhub]
-        ports: ["8080:8080"]
-        environment:
-            CONCOURSE_POSTGRES_HOST: concourse-db
-            CONCOURSE_POSTGRES_USER: admin
-            CONCOURSE_POSTGRES_PASSWORD: ${DUCC_POSTGRES_PASSWORD}
-            CONCOURSE_POSTGRES_DATABASE: concourse
-            CONCOURSE_EXTERNAL_URL: http://${DUCC_HOSTNAME}:8080
-            CONCOURSE_ADD_LOCAL_USER: admin:${DUCC_CONCOURSE_ADMIN_PASSWORD}
-            CONCOURSE_MAIN_TEAM_LOCAL_USER: admin
-            CONCOURSE_WORKER_BAGGAGECLAIM_DRIVER: overlay
-            CONCOURSE_CREDHUB_URL: https://credhub:9000
-            CONCOURSE_CREDHUB_INSECURE_SKIP_VERIFY: "true"
-            # useCaCert: "false"
-            CONCOURSE_CREDHUB_CLIENT_ID: credhub_client
-            CONCOURSE_CREDHUB_CLIENT_SECRET: ${DUCC_CREDHUB_CLIENT_SECRET}
+  concourse-web:
+    image: concourse/concourse:7.9.1
+    command: web
+    # privileged: true
+    depends_on: [concourse-db, credhub]
+    ports: ["8080:8080"]
+    volumes:
+      - "./hack/keys:/concourse-keys"
+    environment:
+      CONCOURSE_SESSION_SIGNING_KEY: /concourse-keys/session_signing_key
+      CONCOURSE_TSA_AUTHORIZED_KEYS: /concourse-keys/authorized_worker_keys
+      CONCOURSE_TSA_HOST_KEY: /concourse-keys/tsa_host_key
 
-    minio:
-        image: minio/minio
-        volumes:
-            - "${DUCC_MINIO_PATH}:/data" # This depends on a 
-        ports:
-            - "9080:9000"
-        environment:
-            MINIO_ACCESS_KEY: minio
-            MINIO_SECRET_KEY: ${DUCC_MINIO_SECRET}
-        command: server /data
-        healthcheck:
-            test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
-            interval: 30s
-            timeout: 20s
-            retries: 3
+      CONCOURSE_POSTGRES_HOST: concourse-db
+      CONCOURSE_POSTGRES_USER: admin
+      CONCOURSE_POSTGRES_PASSWORD: ${DUCC_POSTGRES_PASSWORD}
+      CONCOURSE_POSTGRES_DATABASE: concourse
+      CONCOURSE_EXTERNAL_URL: http://${DUCC_HOSTNAME}:8080
+      CONCOURSE_ADD_LOCAL_USER: admin:${DUCC_CONCOURSE_ADMIN_PASSWORD}
+      CONCOURSE_MAIN_TEAM_LOCAL_USER: admin
+      CONCOURSE_WORKER_BAGGAGECLAIM_DRIVER: overlay
+      CONCOURSE_CREDHUB_URL: https://credhub:9000
+      CONCOURSE_CREDHUB_INSECURE_SKIP_VERIFY: "true"
+      CONCOURSE_CREDHUB_CLIENT_ID: credhub_client
+      CONCOURSE_CREDHUB_CLIENT_SECRET: ${DUCC_CREDHUB_CLIENT_SECRET}
+      
+      CONCOURSE_ENABLE_PIPELINE_INSTANCES: "true"
+      CONCOURSE_ENABLE_ACROSS_STEP: "true"
+      CONCOURSE_ENABLE_CACHE_STREAMED_VOLUMES: "true"
+      CONCOURSE_ENABLE_RESOURCE_CAUSALITY: "true"
+      CONCOURSE_RUNTIME: containerd
+
+  concourse-worker:
+    image: concourse/concourse:7.9.1
+    command: worker
+    privileged: true
+    depends_on: [concourse-web]
+    ports:
+    - 7777:7777
+    - 7788:7788
+    volumes: 
+      - "./hack/keys:/concourse-keys"
+    stop_signal: SIGUSR2
+    environment:
+      CONCOURSE_RUNTIME: containerd
+
+      CONCOURSE_TSA_PUBLIC_KEY: /concourse-keys/tsa_host_key.pub
+      CONCOURSE_TSA_WORKER_PRIVATE_KEY: /concourse-keys/worker_key
+
+      CONCOURSE_LOG_LEVEL: debug
+      CONCOURSE_TSA_HOST: concourse-web:2222
+
+      CONCOURSE_BIND_IP: 0.0.0.0
+      CONCOURSE_BAGGAGECLAIM_BIND_IP: 0.0.0.0
+
+      # avoid using loopbacks
+      CONCOURSE_BAGGAGECLAIM_DRIVER: overlay
+
+      # work with docker-compose's dns
+      CONCOURSE_CONTAINERD_DNS_PROXY_ENABLE: "true"
+      CONCOURSE_RUNTIME: containerd
+      CONCOURSE_WORKER_RUNTIME: containerd
+      CONCOURSE_CONTAINERD_DNS_PROXY_ENABLE: "true"
+
+  minio:
+    image: minio/minio
+    
+    volumes:
+      - "${DUCC_MINIO_PATH}:/data" # This depends on a 
+    ports:
+      - "9080:9000"
+      - "9081:9081"
+    environment:
+      MINIO_ROOT_USER: minio
+      MINIO_ROOT_PASSWORD: ${DUCC_MINIO_SECRET}
+    command: server --console-address :9081 /data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3

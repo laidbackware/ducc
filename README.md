@@ -1,8 +1,8 @@
-# Description
+# DUCC
 Pronounced Duck.
 The goal of this project is the provide the simplest possible implementation of Concourse with Credhub secret management.
 
-# Dependencies
+## Dependencies
 Needed to start Concourse:
 - docker-ce, plus the ability to run privileged containers
 - docker-compose
@@ -16,7 +16,7 @@ The following CLI tools are needed to operate Concourse/Credhub/Minio and can be
 - Credhub CLI - https://github.com/cloudfoundry-incubator/credhub-cli/releases
 - Minio Client - https://min.io/download#/linux
 
-# Setup Process
+## Setup Process
 The most lightweight setup for DUCC is to simply run directly using Docker however it is also possible to run in a Vagrant VM. Instruction are provided below for both options.
 
 ### Common pre-setup steps:
@@ -46,7 +46,7 @@ NOTE: to proceed with post-setup steps and accessing logs/diagnositcs in the vag
 * Logs are available by running `docker-compose logs` in the same directory as the docker-compose.yml file.
 * `docker-compose ps` can be use to check the state of the containers.
 
-# Usage
+## Usage
 When accessing the Concourse webpage, the hostname in the `1-vars.sh` file  must be correct and used in the web browser, as it is used by Concourse when authenticating.
 
 Useful login commands:
@@ -59,10 +59,10 @@ Concourse can be extended with features using the documentation and environmenta
 
 The Minio webpage is accessible on http://${DUCC_HOSTNAME}:9080 with username minio and the password from the `1-vars.sh` file.
 
-# Managing Docker volume space
+## Managing Docker volume space
 If using Concourse heavily with large resources, then the Docker volumes will consume quite a bit of space, so watch out for it filling the mount/disk. Depending on the pipelines run, it's good to have at least 100GB available. Volume size can be monitored with `docker system df` and if there are any unused volumes they are shown as reclaimable, so to reclaim run `docker system prune --volumes`. Concourse and Docker will grow and shrink the in use volumes automatically based on usage.
 
-# Running Offline
+## Running Offline
 It's possible to run offline, but an internet connected system running Docker is required to prepare the images.
 - The prepare credhub script must be run on the internet connected machine.
 - All the Docker images must be pulled onto an internet connected machine and then either pushed to a on-prem registry or manually moved to the Docker host.
@@ -70,14 +70,11 @@ It's possible to run offline, but an internet connected system running Docker is
      Images should transported to the target Docker host and use `docker load` to add images to the local Docker cache.
 - 'docker-compose.yml' should be updated to reflect the new image location and/or tags images. 
 
-## Downloaded Docker Images
-At runtime
+### Downloaded Docker Images
+The following images are needed, with the tags being available in `docker-compose.yml`.
 - concourse/concourse
-- cfidentity/uaa
+- cloudfoundry/uaa
 - minio/minio
 - postgres
 - pcfseceng/credhub
 
-# TODO
-- Refactor to use latest Alpine based UAA image
-- Add second compose file and scripts to enable generation of tls certs for all components

@@ -12,7 +12,7 @@ Vagrant.configure("2") do |config|
 
   config.vagrant.plugins = ["vagrant-docker-compose", "vagrant-disksize"]
 
-  config.vm.box = "ubuntu/bionic64"
+  config.vm.box = "ubuntu/jammy64"
   config.disksize.size = DISK
   config.vm.provider :virtualbox do |v, override|
     v.memory = MEM
